@@ -1,21 +1,47 @@
--- Q1: Total sales revenue by product category for each month
-SELECT dim_product.category, dim_date.month, SUM(fact_sales.sales_amount) AS total_revenue
-FROM fact_sales
-JOIN dim_product ON fact_sales.product_id = dim_product.product_id
-JOIN dim_date ON fact_sales.date_id = dim_date.date_id
-GROUP BY dim_product.category, dim_date.month;
+// OP1: insertMany() — insert all 3 documents from sample_documents.json
+db.products.insertMany([
+  {
+    product_id: 1,
+    category: "Electronics",
+    product_name: "Laptop",
+    price: 55000,
+    brand: "Dell"
+  },
+  {
+    product_id: 2,
+    category: "Groceries",
+    product_name: "Milk",
+    price: 60,
+    expiry_date: "2024-12-20"
+  },
+  {
+    product_id: 3,
+    category: "Clothing",
+    product_name: "T-Shirt",
+    price: 800,
+    brand: "Puma"
+  }
+]);
 
--- Q2: Top 2 performing stores by total revenue
-SELECT dim_store.store_name, SUM(fact_sales.sales_amount) AS total_revenue
-FROM fact_sales
-JOIN dim_store ON fact_sales.store_id = dim_store.store_id
-GROUP BY dim_store.store_name
-ORDER BY total_revenue DESC
-LIMIT 2;
+// OP2: find() — retrieve all Electronics products with price > 20000
+db.products.find({
+  category: "Electronics",
+  price: { $gt: 20000 }
+});
 
--- Q3: Month-over-month sales trend across all stores
-SELECT dim_date.month, SUM(fact_sales.sales_amount) AS monthly_sales
-FROM fact_sales
-JOIN dim_date ON fact_sales.date_id = dim_date.date_id
-GROUP BY dim_date.month
-ORDER BY dim_date.month;
+// OP3: find() — retrieve all Groceries expiring before 2025-01-01
+db.products.find({
+  category: "Groceries",
+  expiry_date: { $lt: "2025-01-01" }
+});
+
+// OP4: updateOne() — add a discount_percent field to a specific product
+db.products.updateOne(
+  { product_name: "Laptop" },
+  { $set: { discount_percent: 10 } }
+);
+
+// OP5: createIndex() — create an index on category field
+db.products.createIndex({ category: 1 });
+
+// Index on category improves search speed when filtering products by category.
